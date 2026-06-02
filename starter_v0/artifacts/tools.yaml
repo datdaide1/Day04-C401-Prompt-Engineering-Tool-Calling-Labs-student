@@ -9,62 +9,62 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Hỏi lại user đúng một câu khi thiếu thông tin bắt buộc hoặc cần xác nhận. Luôn truyền response_type rõ ràng: text cho thiếu account/URL, yes_no cho xác nhận gửi/đăng/publish, choice khi có options."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
-      required: [question]
+        question: {type: string, default: "", description: "Câu hỏi ngắn, chỉ hỏi phần thông tin còn thiếu hoặc hỏi xác nhận hành động."}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Bắt buộc set rõ. Dùng text khi cần account/handle/URL; yes_no khi user muốn send/post/publish nhưng chưa xác nhận; choice khi cần chọn từ options."}
+        options: {type: array, default: [], items: {type: string}, description: "Chỉ điền khi response_type=choice; để [] cho text hoặc yes_no."}
+      required: [question, response_type]
 
   - name: timeline
-    description: "Lấy các bài đăng gần đây."
+    description: "Lấy bài đăng/tweet gần đây từ một account cụ thể. Chỉ dùng khi user nêu rõ người hoặc handle; nếu thiếu account thì dùng clarify, không đoán."
     parameters:
       type: object
       properties:
-        screenname: {type: string, default: "", description: "Tên tài khoản"}
-        limit: {type: integer, default: 5, description: "Số lượng"}
+        screenname: {type: string, default: "", description: "Handle không có @. Map tên phổ biến khi rõ: Sam Altman -> sama, Elon Musk -> elonmusk, Andrej Karpathy -> karpathy."}
+        limit: {type: integer, default: 5, description: "Số bài đăng cần lấy. Tôn trọng số user nói rõ, ví dụ 10 tweet -> limit=10; mặc định 5."}
       required: [screenname]
 
   - name: social_search
-    description: "Tìm trên mạng xã hội."
+    description: "Tìm bài đăng/tweet theo chủ đề hoặc keyword trên mạng xã hội. Dùng cho câu hỏi 'mọi người đang bàn gì', tweet về một chủ đề, hoặc top/popular posts; không dùng cho tweet của một account cụ thể."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Từ khóa"}
-        search_type: {type: string, enum: [Latest, Top], default: "Latest", description: "Cách sắp xếp"}
-        limit: {type: integer, default: 5, description: "Số lượng"}
+        query: {type: string, default: "", description: "Chủ đề/keyword sạch để tìm trên social, ví dụ GPT-5 hoặc OpenAI."}
+        search_type: {type: string, enum: [Latest, Top], default: "Latest", description: "Latest mặc định; dùng Top khi user nói top, phổ biến, viral, nổi bật nhất."}
+        limit: {type: integer, default: 5, description: "Số kết quả cần lấy. Tôn trọng số user nói rõ; mặc định 5."}
       required: [query]
 
   - name: lookup
-    description: "Tra cứu thông tin trên internet."
+    description: "Tìm kiếm web bằng Tavily cho thông tin hiện tại, tin tức, hoặc câu hỏi cần web search. Dùng topic=news cho tin tức/current events. Giữ query là chủ đề sạch, không nhét news/today/this week vào query."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Truy vấn"}
-        topic: {type: string, enum: [general, news], default: "general", description: "Phân loại"}
-        timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Khoảng thời gian"}
-        max_results: {type: integer, default: 5, description: "Số kết quả"}
+        query: {type: string, default: "", description: "Chủ đề sạch cần tìm, ví dụ AI, robotics, OpenAI. Không dùng 'AI news today'; hãy dùng query=AI, topic=news, timeframe=day."}
+        topic: {type: string, enum: [general, news], default: "general", description: "news cho tin tức/current events; general cho tra cứu web chung."}
+        timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Khoảng thời gian cho news: hôm nay/today -> day; tuần này/this week -> week; tháng này -> month; năm nay -> year."}
+        max_results: {type: integer, default: 5, description: "Số kết quả web cần lấy. Tôn trọng số user nói rõ; mặc định 5."}
       required: [query]
 
   - name: fetch
-    description: "Lấy nội dung từ một địa chỉ."
+    description: "Đọc nội dung từ một URL cụ thể bằng Firecrawl. Chỉ dùng khi user cung cấp link/URL rõ ràng; nếu user nói 'bài này' hoặc 'this article' nhưng không có URL thì dùng clarify."
     parameters:
       type: object
       properties:
-        url: {type: string, default: "", description: "Địa chỉ"}
+        url: {type: string, default: "", description: "URL đầy đủ cần đọc, ví dụ https://openai.com/blog/gpt-5."}
       required: [url]
 
   - name: format
-    description: "Trình bày dữ liệu đã có thành văn bản."
+    description: "Trình bày các items đã có thành markdown digest. Tool này không tìm kiếm, không đọc URL, không gọi API dữ liệu mới; chỉ dùng sau khi đã có items từ tool khác hoặc từ user."
     parameters:
       type: object
       properties:
         items:
           type: array
           default: []
-          description: "Danh sách item"
+          description: "Danh sách item đã có sẵn để format; không tự tạo item giả."
           items:
             type: object
             properties:
@@ -73,8 +73,8 @@ tools:
               source: {type: string}
               summary: {type: string}
               section: {type: string}
-        template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Khuôn"}
-        headline: {type: string, default: "", description: "Tiêu đề"}
+        template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Kiểu trình bày: brief ngắn, bullets gạch đầu dòng, sections theo mục, thread dạng chuỗi post, daily_ai_vn cho bản tin AI tiếng Việt."}
+        headline: {type: string, default: "", description: "Tiêu đề markdown nếu user yêu cầu hoặc nếu cần digest có headline."}
       required: [items, template]
 
   # ---------------- Bonus tools ----------------
