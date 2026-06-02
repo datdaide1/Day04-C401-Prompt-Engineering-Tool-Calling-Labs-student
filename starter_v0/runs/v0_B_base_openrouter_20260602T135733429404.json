@@ -1,0 +1,1476 @@
+{
+  "run_id": "v0_B_base_openrouter_20260602T135733429404",
+  "version": "v0",
+  "artifact_version": "v0+pf0c107a9d7a1+t6cdb53d5d7b8",
+  "prompt_hash": "f0c107a9d7a14032c948d642d7c36f2a85cb6d69a099530093a874c94d472446",
+  "tools_hash": "6cdb53d5d7b8de80d60b298b1357f462cedbedfae261d5ba60b08ccc401687c5",
+  "phase": "B",
+  "suite": "base",
+  "provider": "openrouter",
+  "model": "meta/llama-3.3-70b-instruct",
+  "system_prompt": "E:\\VINUNI\\Day04-C401-Prompt-Engineering-Tool-Calling-Labs-student\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "E:\\VINUNI\\Day04-C401-Prompt-Engineering-Tool-Calling-Labs-student\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_base.json",
+  "dataset_id": "day04_v2_research_base",
+  "dataset_role": "base",
+  "description": "Core eval cho research agent: routing đúng tool + đúng args, hỏi lại khi thiếu (ask_user), xác nhận trước khi gửi, và xử lý câu ngoài phạm vi / không cần tool. Chấm trên tool_calls + args (subset). KHÔNG sửa file này — chỉ thêm case vào eval_group.json.",
+  "generated_at": "2026-06-02T13:57:33",
+  "summary": {
+    "total_cases": 20,
+    "measured_cases": 20,
+    "provider_error_cases": 0,
+    "passed_cases": 7,
+    "case_accuracy": 0.35,
+    "tool_routing_accuracy": 0.7,
+    "argument_accuracy": 0.35,
+    "multiturn_accuracy": 0.3333,
+    "failure_counts": {
+      "wrong_tool": 4,
+      "wrong_arg_value": 3,
+      "out_of_scope": 2,
+      "missing_info": 3,
+      "wrong_boundary": 1
+    },
+    "observed_mismatch_counts": {
+      "wrong_arg_value": 8,
+      "unexpected_tool_call": 2,
+      "missing_tool_call": 3
+    }
+  },
+  "results": [
+    {
+      "id": "R01_user_tweets_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_user_tweets_name_to_handle",
+        "difficulty": "medium",
+        "what_it_tests": "Tin CỦA một người nổi tiếng → map tên Sam Altman thành handle sama rồi gọi get_user_tweets."
+      },
+      "input": "Tweet mới nhất của Sam Altman là gì?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "samaltman",
+              "limit": "1"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_tool",
+        "failures": [
+          "screenname: expected 'sama', got 'samaltman'"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "samaltman",
+            "limit": "1"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R02_search_tweets_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_search_tweets",
+        "difficulty": "easy",
+        "what_it_tests": "Tweet theo CHỦ ĐỀ → search_tweets, không phải get_user_tweets."
+      },
+      "input": "Mọi người đang bàn gì về GPT-5 trên Twitter?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {}
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "GPT-5",
+              "search_type": "Latest",
+              "limit": "10"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "social_search",
+          "args": {
+            "query": "GPT-5",
+            "search_type": "Latest",
+            "limit": "10"
+          },
+          "result": {
+            "tool": "search_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R03_web_news_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_web_news",
+        "difficulty": "medium",
+        "what_it_tests": "Tin thời sự trên web → web_search topic=news, timeframe=day (hôm nay)."
+      },
+      "input": "Tin tức AI hôm nay có gì nổi bật?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "AI",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "Tin túc AI hôm nay",
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": "5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_tool",
+        "failures": [
+          "query: expected 'AI', got 'Tin túc AI hôm nay'"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "Tin túc AI hôm nay",
+            "topic": "news",
+            "timeframe": "day",
+            "max_results": "5"
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "Tin túc AI hôm nay",
+            "topic": "news",
+            "timeframe": "day",
+            "items": [
+              {
+                "title": "Wall Street futures gain as AI advances overshadow US-Iran tensions - Reuters",
+                "url": "https://www.reuters.com/world/africa/wall-street-futures-gain-ai-advances-overshadow-us-iran-tensions-2026-06-01/",
+                "source": "reuters.com",
+                "summary": "# Wall Street futures gain as AI advances overshadow US-Iran tensions | Reuters. ## Browse World. ## Browse Business. ## Browse Legal. June 1 (Reuters) - U.S. stock ​index futures climbed on Monday, starting June on a firm footing, as the ‌latest AI push from Nvidia and Microsoft lifted shares, even as uncertainty over the Middle East war lingered. Nvidia (NVDA.O), opens new tab rose 1.6% in premarket trading after the world's most valuable company unveiled a new chip that brings ​AI capabilities to laptops and desktops, set for release this fall. The Reuters Iran Briefing newsletter keeps you informed with the latest developments and analysis of the Iran war. The chip is ​a result of a three-year partnership with Microsoft (MSFT.O), opens new tab to \"reinvent the PC\" for ⁠the AI era, Nvidia CEO Jensen Huang said. *   #### World-Check, opens new tab. *   Media Center, opens new tab. *   Reuters and AI, opens new tab.",
+                "score": 0.118273266
+              },
+              {
+                "title": "Stock Market Today: New Nvidia Chip Fuels AI Enthusiasm, Oil Climbs After Mideast Hostilities — Live Updates - WSJ",
+                "url": "https://www.wsj.com/livecoverage/stock-market-today-dow-sp-500-nasdaq-06-01-2026",
+                "source": "wsj.com",
+                "summary": "# Stock Market Today: Dow Opens Lower, Oil Climbs; New Nvidia Chip Fuels AI Enthusiasm — Live Updates. S&P 500 7580.15 0.00%. Nasdaq 26999.93 0.10%. U.S. 10 Yr -27/32 4.501%. KBW Nasdaq Bank Index 168.21 -0.72%. S&P GSCI Index Spot 713.01 2.65%. # Stock Market Today: New Nvidia Chip Fuels AI Enthusiasm. U.S. stock futures rose this morning, driven by enthusiasm around AI, though they were later knocked by Iran's semi-official Tasnim news agency that the country was suspending negotiations with the U.S. over Israel's conduct. Adding to the AI fervor this morning was Nvidia’s unveiling of its new superchip, which it described as “the most efficient PC chip ever built.” The world’s most valuable company will work with manufacturers including Dell Technologies, Microsoft and Lenovo to build laptops, which will be designed for running AI agents. South Korea’s Kospi index, which is dominated by AI chip makers Samsung and SK Hynix, surged 3.7%, bringing its year-to-date gains to 109%.",
+                "score": 0.110615395
+              },
+              {
+                "title": "China Aims A.I. at Predicting Who Could Pose a Political Risk - The New York Times",
+                "url": "https://www.nytimes.com/2026/06/01/us/politics/china-ai-predicting-dissent.html",
+                "source": "nytimes.com",
+                "summary": "# China Aims A.I. at Predicting Who Could Pose a Political Risk - The New York Times. Politics|China Aims A.I. at Predicting Who Could Pose a Political Risk. A Chinese firm is working on products that use A.I. to examine location data and internet use to predict who could do or say something critical of the government.Credit...Lam Yik Fei for The New York Times. # China Aims A.I. at Predicting Who Could Pose a Political Risk. But according to leaked company documents, the firm is working on new products that use artificial intelligence to examine location data and internet use to predict who could do or say something critical of the government, according to researchers at Vanderbilt University. A version of this article appears in print on June 1, 2026, Section A, Page 1 of the New York edition with the headline: China Aims A.I. at Nipping Dissent in the Bud. Order Reprints | Today’s Paper | Subscribe.",
+                "score": 0.08377804
+              },
+              {
+                "title": "Column: Tin re-balances but investors are still betting on scarcity - Mining.com",
+                "url": "https://www.mining.com/web/column-tin-re-balances-but-investors-are-still-betting-on-scarcity/",
+                "source": "mining.com",
+                "summary": "Silver Futures $ 75.495 / ozt  7.47%. Micro Gold Futures $ 4713.1 / ozt  3.80%. Micro Silver Futures $ 75.48 / ozt  7.54%. Gold Futures $ 4713.3 / ozt  3.84%. LME three-month tin is trading at $55,225 per metric ton, close to the all-time high of $59,040 reached during the frenzied cross-metals rally in January. The London tin price is up by 36% since the start of the year. The next best performer is aluminum, which has risen by 23% and is experiencing an unprecedented supply shock after the loss of Gulf production due to the Iran war. Tin supply has no direct exposure to the war in the Gulf, unlike aluminum, nickel and copper. Global mine production is on course to grow by a healthy 8.7% this year, according to the International Tin Association (ITA). Production at the Bisie mine in the Democratic Republic of Congo is stable after last year’s brief closure due to encroaching M23 insurgents.",
+                "score": 0.08234999
+              },
+              {
+                "title": "The Middle East money behind OpenAI, Anthropic & xAI - CNBC",
+                "url": "https://www.cnbc.com/video/2026/06/02/the-middle-east-money-behind-openai-anthropic-xai.html",
+                "source": "cnbc.com",
+                "summary": "Monday - Friday: 12:00 - 13:00 SIN/HK | 0600 - 07:00 CET. # The Middle East money behind OpenAI, Anthropic & xAI. Gulf capital is backing the three most hotly anticipated IPOs this year.",
+                "score": 0.06924549
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "R04_read_url_routing",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "routing_read_url",
+        "difficulty": "easy",
+        "what_it_tests": "Đã có link cụ thể → read_url, không phải web_search."
+      },
+      "input": "Tóm tắt bài này giúp mình: https://openai.com/blog/gpt-5",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://openai.com/blog/gpt-5"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://openai.com/blog/gpt-5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "fetch",
+          "args": {
+            "url": "https://openai.com/blog/gpt-5"
+          },
+          "result": {
+            "tool": "read_url",
+            "error": "RuntimeError",
+            "message": "Missing FIRECRAWL_API_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R05_limit_arg",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_limit",
+        "difficulty": "easy",
+        "what_it_tests": "Trích đúng limit=10 từ '10 tweet'."
+      },
+      "input": "Lấy 10 tweet mới nhất của Elon Musk",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 10
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": "10"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_arg_value",
+        "failures": [
+          "limit: expected 10, got '10'"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "elonmusk",
+            "limit": "10"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R06_timeframe_arg",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_timeframe",
+        "difficulty": "medium",
+        "what_it_tests": "'tuần này' → timeframe=week."
+      },
+      "input": "Tin công nghệ trong tuần này",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "tin công nghế",
+              "topic": "news",
+              "timeframe": "week",
+              "max_results": "5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "tin công nghế",
+            "topic": "news",
+            "timeframe": "week",
+            "max_results": "5"
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "tin công nghế",
+            "topic": "news",
+            "timeframe": "week",
+            "items": [
+              {
+                "title": "Nintech, Mold and Injection Molding Manufacturer, Files for Nasdaq Capital Market IPO - TradingView",
+                "url": "https://www.tradingview.com/news/tradingview:50e7d0a2b7afc:0-nintech-mold-and-injection-molding-manufacturer-files-for-nasdaq-capital-market-ipo/",
+                "source": "tradingview.com",
+                "summary": "# Nintech, Mold and Injection Molding Manufacturer, Files for Nasdaq Capital Market IPO. Nintech, a China-based manufacturer of customized molds and injection-molded parts, filed an F-1 to list its Class A ordinary shares on the Nasdaq Capital Market under the symbol NTMJ. The company plans to offer 6,250,000 shares at an estimated price range of $4.00 to $5.00 per share. The company operates from Taizhou, Jiangsu Province, and leverages advanced production equipment and high-precision testing instruments, supported by quality certifications including IATF 16949, ISO 9001, and ISO 14001. Revenue primarily comes from product sales—both injection-molded parts and customized molds—with a small portion from mold repair and processing services. * **Total addressable market**: China’s mold manufacturing sector generated RMB 363.3 billion in main business revenue in 2024. * **Market growth**: Home appliance mold market expected to grow from RMB 45 billion in 2025 to RMB 65 billion in 2030 (≈7.5% CAGR). * **Market position**: China remains a net exporter of molds with total mold exports above USD 8.7 billion in 2024.",
+                "score": 0.17925774
+              },
+              {
+                "title": "Elementos brings general manager on board for Spain operations - Mining.com.au",
+                "url": "https://mining.com.au/elementos-brings-general-manager-on-board-for-spain-operations/",
+                "source": "mining.com.au",
+                "summary": "Elementos (ASX:ELT) has appointed Antonio Martín Sánchez as the company’s General Manager for its Spain-based operations, effective 1 July 2026. This will include the development of the Oropesa Tin Project in Andalucía and the project’s alignment with the Robledollano Tin Smelter, in which the company has a binding option to acquire a 50% interest stake. He has contributed to delivering reduced emissions, energy efficiency, and environmental, social, and governance (ESG) reporting in previous roles, which Elementos says aligns with its commitment to responsible development and its ambition to establish a *“modern, responsible, and reliable tin supply chain”*from Spain for Europe. *“The board welcomes Antonio to MESPA and looks forward to his contribution as we progress the growth of our vertically integrated tin operations.”*. Elementos is a tin and critical minerals development company focused on becoming a key supplier to global technology and electrification markets, with its flagship asset being the Oropesa Tin Project in Spain.",
+                "score": 0.13347194
+              },
+              {
+                "title": "Technocraft Industries Q4 FY26: Strong Quarter Masks Margin Pressures and Sector Underperformance - Markets Mojo",
+                "url": "https://www.marketsmojo.com/news/result-analysis/technocraft-industries-q4-fy26-strong-quarter-masks-margin-pressures-and-sector-underperformance-4023642",
+                "source": "marketsmojo.com",
+                "summary": "Technocraft Industries (India)_Ltd_4023642_30052026) Ltd., a diversified manufacturer specialising in drum closures, scaffolding systems, cotton yarn, fabric, and engineering services, reported a robust conclusion to fiscal year 2026 with consolidated net profit surging 43.03% quarter-on-quarter to ₹76.08 crores in Q4 FY26, despite persistent margin headwinds. The Mumbai-based small-cap company, commanding a market capitalisation of ₹6,034 crores, delivered this performance against a backdrop of modest revenue growth and operational margin compression, raising questions about earnings sustainability as the stock tumbled 6.1% on May 29, 2026, closing at ₹2,464.15. Whilst Technocraft delivered its highest operating profit before depreciation, interest, and tax (PBDIT) excluding other income at ₹139.34 crores in Q4 FY26, the company's year-on-year revenue growth decelerated sharply to just 1.34%, down from 19.64% in Q2 FY26. This slowdown, coupled with the stock's underperformance relative to its iron and steel products sector peers—trailing the sector by a staggering 39.17 percentage points over the past year—has left investors questioning whether the Saraf brothers' 1992-founded enterprise can sustain its momentum.",
+                "score": 0.12664494
+              },
+              {
+                "title": "Lead-Free Perovskites Push Solar Cells Toward Safer High-Efficiency Designs - AZoM",
+                "url": "https://www.azom.com/news.aspx?newsID=65493",
+                "source": "azom.com",
+                "summary": "**By replacing toxic lead with safer alternatives such as tin, bismuth, antimony, and double perovskites, researchers are charting a path toward next-generation solar cells that could combine high performance with improved environmental safety.**. Image 4: Figure oulined the schematic representation of lead-free perovskite structure (A site represents monovalent cation, X represents a halide anion with bi/trivalent cation from each type of perovskite family) and the year-wise progression of the most efficient PSCs from each lead-free perovskite family from 2016 to 2025. _Figure oulined the schematic representation of lead-free perovskite structure (A site represents monovalent cation, X represents a halide anion with bi/trivalent cation from each type of perovskite family) and the year-wise progression of the most efficient PSCs from each lead-free perovskite family from 2016 to 2025._. The review highlighted key design approaches that have helped raise tin-based lead-free device power conversion efficiencies from below 1% to 17.13%, thereby providing a research roadmap for developing more scalable, high-performance, and environmentally sustainable solar technologies.",
+                "score": 0.121989004
+              },
+              {
+                "title": "Column: Tin re-balances but investors are still betting on scarcity - Mining.com",
+                "url": "https://www.mining.com/web/column-tin-re-balances-but-investors-are-still-betting-on-scarcity/",
+                "source": "mining.com",
+                "summary": "Silver Futures $ 75.495 / ozt  7.47%. Micro Gold Futures $ 4713.1 / ozt  3.80%. Micro Silver Futures $ 75.48 / ozt  7.54%. Gold Futures $ 4713.3 / ozt  3.84%. LME three-month tin is trading at $55,225 per metric ton, close to the all-time high of $59,040 reached during the frenzied cross-metals rally in January. The London tin price is up by 36% since the start of the year. The next best performer is aluminum, which has risen by 23% and is experiencing an unprecedented supply shock after the loss of Gulf production due to the Iran war. Tin supply has no direct exposure to the war in the Gulf, unlike aluminum, nickel and copper. Global mine production is on course to grow by a healthy 8.7% this year, according to the International Tin Association (ITA). Production at the Bisie mine in the Democratic Republic of Congo is stable after last year’s brief closure due to encroaching M23 insurgents.",
+                "score": 0.11101954
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "R07_search_type_arg",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "arg_search_type",
+        "difficulty": "medium",
+        "what_it_tests": "'phổ biến/top' → search_type=Top (không phải Latest)."
+      },
+      "input": "Cho mình các tweet phổ biến (top) nhất về OpenAI",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Top"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "OpenAI",
+              "search_type": "Top",
+              "limit": "5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "social_search",
+          "args": {
+            "query": "OpenAI",
+            "search_type": "Top",
+            "limit": "5"
+          },
+          "result": {
+            "tool": "search_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R08_out_of_scope",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "out_of_scope",
+        "difficulty": "easy",
+        "what_it_tests": "Câu ngoài phạm vi research → KHÔNG gọi tool, từ chối/định hướng."
+      },
+      "input": "Giải giúp mình bài toán tích phân: nguyên hàm của x^2 là gì?",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "Nguyưn hãm cưa x^2 là (1/3)x^3 + C",
+              "confirmed": "true"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": "unexpected_tool_call",
+        "failure_type": "out_of_scope",
+        "failures": [
+          "expected no tool call"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "send",
+          "args": {
+            "text": "Nguyưn hãm cưa x^2 là (1/3)x^3 + C",
+            "confirmed": "true"
+          },
+          "result": {
+            "tool": "send_telegram",
+            "error": "RuntimeError",
+            "message": "Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R09_no_tool_capability",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "no_tool_meta",
+        "difficulty": "easy",
+        "what_it_tests": "Câu hỏi meta → trả lời thẳng, KHÔNG gọi tool."
+      },
+      "input": "Bạn là gì và làm được những gì?",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "{\"type\": \"function\", \"name\": \"send\", \"parameters\": {\"text\": \"Xin ch\\u00e0o! T\\u00f4i l\\u00e0 tr\\u01b0\\u1edd \\u00e1p AI. T\\u00f4i c\\u00f3 th\\u1ebf l\\u00e0m nh\\u01b0ng vi\\u1ec7c sau: \\n- Tr\\u1ee3 c\\u1eadp th\\u00f4ng tin tr\\u1ecbn internet.\\n- T\\u00ecm ki\\u1ebfm th\\u00f4ng tin tr\\u1ecbn m\\u00e0ng x\\u00e3 h\\u1ôi.\\n- G\\u01b0i \\u0111i \\u1ee9ng d\\u1ea1n v\\u00e0o m\\u00e0ng x\\u00e3 h\\u1ôi.\\n- T\\u00f4i c\\u00f3 th\\u1ebf gi\\u1eefi \\u1ee3ng d\\u1ea1n c\\u00e1c c\\u00e2u h\\u1ôi \\u0111\\u01b0\\u1ee3c \\u0111\\u1ea7t ra.\", \"confirmed\": \"true\"}}",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "R10_missing_handle",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_missing_handle",
+        "difficulty": "medium",
+        "what_it_tests": "Thiếu handle → ask_user, KHÔNG đoán bừa người nào."
+      },
+      "input": "Tóm tắt 5 tweet mới nhất giúp mình",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "format",
+            "args": {
+              "items": {
+                "function_name": "timeline",
+                "args": [
+                  {
+                    "screenname": "samaltman"
+                  },
+                  {
+                    "limit": 5
+                  }
+                ]
+              },
+              "template": "brief"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "missing_info",
+        "failures": [
+          "missing tool call clarify",
+          "extra tool call format"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "format",
+          "args": {
+            "items": {
+              "function_name": "timeline",
+              "args": [
+                {
+                  "screenname": "samaltman"
+                },
+                {
+                  "limit": 5
+                }
+              ]
+            },
+            "template": "brief"
+          },
+          "result": {
+            "error": "TypeError",
+            "message": "unhashable type: 'slice'"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R11_missing_url",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_missing_url",
+        "difficulty": "medium",
+        "what_it_tests": "Nói 'bài này' nhưng không có link → ask_user xin URL."
+      },
+      "input": "Tóm tắt bài viết này hộ mình",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://www.bbc.com/news"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "missing_info",
+        "failures": [
+          "missing tool call clarify",
+          "extra tool call fetch"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "fetch",
+          "args": {
+            "url": "https://www.bbc.com/news"
+          },
+          "result": {
+            "tool": "read_url",
+            "error": "RuntimeError",
+            "message": "Missing FIRECRAWL_API_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R12_confirm_before_send",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "confirm_before_write",
+        "difficulty": "medium",
+        "what_it_tests": "Hành động ghi (gửi) → xác nhận trước (ask_user yes_no), không tự gửi."
+      },
+      "input": "Đăng bản tin này lên Telegram giúp mình",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "Bàn tin mới",
+              "confirmed": "true"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "wrong_boundary",
+        "failures": [
+          "missing tool call clarify",
+          "extra tool call send"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "send",
+          "args": {
+            "text": "Bàn tin mới",
+            "confirmed": "true"
+          },
+          "result": {
+            "tool": "send_telegram",
+            "error": "RuntimeError",
+            "message": "Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "R13_parallel_web_and_tweets",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "parallel_tool_calls",
+        "difficulty": "hard",
+        "what_it_tests": "Một request cần hai nguồn → gọi cả web_search và search_tweets; eval không phụ thuộc thứ tự tool call."
+      },
+      "input": "Tìm trên web tin AI hôm nay và tìm thêm tweet về AI.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "AI",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          },
+          {
+            "name": "social_search",
+            "args": {
+              "query": "AI"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "tin AI hôm nay",
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": "5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_tool",
+        "failures": [
+          "query: expected 'AI', got 'tin AI hôm nay'",
+          "missing tool call social_search"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "tin AI hôm nay",
+            "topic": "news",
+            "timeframe": "day",
+            "max_results": "5"
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "tin AI hôm nay",
+            "topic": "news",
+            "timeframe": "day",
+            "items": [
+              {
+                "title": "Stock Market Today: New Nvidia Chip Fuels AI Enthusiasm, Oil Climbs After Mideast Hostilities — Live Updates - WSJ",
+                "url": "https://www.wsj.com/livecoverage/stock-market-today-dow-sp-500-nasdaq-06-01-2026",
+                "source": "wsj.com",
+                "summary": "# Stock Market Today: Dow Opens Lower, Oil Climbs; New Nvidia Chip Fuels AI Enthusiasm — Live Updates. S&P 500 7580.15 0.00%. Nasdaq 26999.93 0.10%. U.S. 10 Yr -27/32 4.501%. KBW Nasdaq Bank Index 168.21 -0.72%. S&P GSCI Index Spot 713.01 2.65%. # Stock Market Today: New Nvidia Chip Fuels AI Enthusiasm. U.S. stock futures rose this morning, driven by enthusiasm around AI, though they were later knocked by Iran's semi-official Tasnim news agency that the country was suspending negotiations with the U.S. over Israel's conduct. Adding to the AI fervor this morning was Nvidia’s unveiling of its new superchip, which it described as “the most efficient PC chip ever built.” The world’s most valuable company will work with manufacturers including Dell Technologies, Microsoft and Lenovo to build laptops, which will be designed for running AI agents. South Korea’s Kospi index, which is dominated by AI chip makers Samsung and SK Hynix, surged 3.7%, bringing its year-to-date gains to 109%.",
+                "score": 0.24712381
+              },
+              {
+                "title": "Column: Tin re-balances but investors are still betting on scarcity - Mining.com",
+                "url": "https://www.mining.com/web/column-tin-re-balances-but-investors-are-still-betting-on-scarcity/",
+                "source": "mining.com",
+                "summary": "Silver Futures $ 75.495 / ozt  7.47%. Micro Gold Futures $ 4713.1 / ozt  3.80%. Micro Silver Futures $ 75.48 / ozt  7.54%. Gold Futures $ 4713.3 / ozt  3.84%. LME three-month tin is trading at $55,225 per metric ton, close to the all-time high of $59,040 reached during the frenzied cross-metals rally in January. The London tin price is up by 36% since the start of the year. The next best performer is aluminum, which has risen by 23% and is experiencing an unprecedented supply shock after the loss of Gulf production due to the Iran war. Tin supply has no direct exposure to the war in the Gulf, unlike aluminum, nickel and copper. Global mine production is on course to grow by a healthy 8.7% this year, according to the International Tin Association (ITA). Production at the Bisie mine in the Democratic Republic of Congo is stable after last year’s brief closure due to encroaching M23 insurgents.",
+                "score": 0.22268362
+              },
+              {
+                "title": "AI & Tech Brief: Exclusive | AI ad campaigns slam Trahan - The Washington Post",
+                "url": "https://www.washingtonpost.com/wp-intelligence/ai-tech-brief/2026/06/01/ai-tech-brief-exclusive-ai-ad-campaigns-slam-trahan/",
+                "source": "washingtonpost.com",
+                "summary": "AI & Tech Brief from WP Intelligence. # AI & Tech Brief: Exclusive | AI ad campaigns slam Trahan. Plus, Anthropic files for a blockbuster initial public offering. Make us preferred on Google. Sign up here to get this newsletter in your inbox. * **Exclusive:** AI safety group Americans for Responsible Innovation rolls out a six-figure ad campaign this week attacking Rep. Lori Trahan (D-Massachusetts), arguing that she’s “taking the side” of AI oligarchs in her bipartisan legislative efforts. * The AI safety community doesn’t want to hand power of AI regulation to President Donald Trump’s administration now that states are passing more rigorous AI laws — and the California and New York attorneys general are challenging big AI companies. * Nvidia is rolling out a new “world model” simulator for robots and a new design platform for robot developers. In doing so, the company is running the same business playbook it did to become so dominant in the chip market.",
+                "score": 0.16636397
+              },
+              {
+                "title": "Has India miss the AI boat? South Korea now ahead in market cap - CNBC",
+                "url": "https://www.cnbc.com/video/2026/06/02/has-india-miss-the-ai-boat-south-korea-now-ahead-in-market-cap.html",
+                "source": "cnbc.com",
+                "summary": "Monday - Friday, 11:00 - 12:00 SIN/HK | 0500 - 06:00 CET. # Has India miss the AI boat? South Korea now ahead in market cap. Venugopal Garre, Managing Director and Head of India Research at Bernstein, discusses India's AI ambitions. He sees opportunities in India's capital equipment and data center developer companies as ways for investors to play the proxy AI trade.",
+                "score": 0.12407521
+              },
+              {
+                "title": "40% of executives thought AI could save up to 20%. It didn’t deliver. - PitchBook",
+                "url": "https://pitchbook.com/news/articles/40-of-executives-thought-ai-could-save-up-to-20-it-didnt-deliver",
+                "source": "pitchbook.com",
+                "summary": "## The gap between AI spending and productivity gains “should be making executives uncomfortable,” a Bain report found. Corporates are beefing up their AI budgets but seeing lackluster productivity gains, according to the latest Bain & Company report. Bain’s Automation and AI Pathfinder Survey 2026, which had 951 respondents, found that 40% of the companies that tracked their spending recorded cost savings of less than 10% from their AI initiatives. Still, 90% of those surveyed whose AI investments underdelivered plan to increase their AI budgets next year. As compute and usage costs have risen dramatically, executives and shareholders are taking a closer look at the returns that those investments have brought so far. A PitchBook analysis of 186 AI-related questions on B2C earnings calls found that 90% were probing and investigative in tone, and that ROI and financial returns have overtaken product roadmaps as the dominant focus. Employees’ use of AI tools can range from coding assistants to AI-generated research to organizing unstructured databases.",
+                "score": 0.09944416
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "R14_out_of_scope_coding",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "out_of_scope_coding",
+        "difficulty": "easy",
+        "what_it_tests": "Câu coding ngoài phạm vi research/news → KHÔNG gọi tool."
+      },
+      "input": "Viết giúp mình một hàm Python tính Fibonacci bằng recursion.",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "def fibonacci(n):\n    if n <= 0:\n        return \"Input should be a positive integer.\"\n    elif n == 1:\n        return 0\n    elif n == 2:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)",
+              "confirmed": true
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": "unexpected_tool_call",
+        "failure_type": "out_of_scope",
+        "failures": [
+          "expected no tool call"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "send",
+          "args": {
+            "text": "def fibonacci(n):\n    if n <= 0:\n        return \"Input should be a positive integer.\"\n    elif n == 1:\n        return 0\n    elif n == 2:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)",
+            "confirmed": true
+          },
+          "result": {
+            "tool": "send_telegram",
+            "error": "RuntimeError",
+            "message": "Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M01_clarify_then_fill",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_clarify_fill",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: carry limit=5 từ lượt 1 + map tên Elon Musk thành handle elonmusk từ lượt 2."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tóm tắt 5 tweet mới nhất giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Của Elon Musk nhé"
+        },
+        {
+          "role": "user",
+          "content": "Giữ đúng 5 tweet, đừng đổi số lượng"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 5
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": "5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "missing_info",
+        "failures": [
+          "limit: expected 5, got '5'"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "elonmusk",
+            "limit": "5"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M02_carryover_timeframe",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_carryover",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: chỉ xử lý latest turn, carry timeframe=day và topic=news, query robotics."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tin AI hôm nay có gì?"
+        },
+        {
+          "role": "user",
+          "content": "Còn về robotics thì sao?"
+        },
+        {
+          "role": "user",
+          "content": "Chỉ tìm robotics thôi, vẫn là tin hôm nay"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": "5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "day",
+            "max_results": "5"
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "robotics",
+            "topic": "news",
+            "timeframe": "day",
+            "items": [
+              {
+                "title": "Top 10 robotics stories of May 2026 - The Robot Report",
+                "url": "https://www.therobotreport.com/top-10-robotics-stories-of-may-2026/",
+                "source": "therobotreport.com",
+                "summary": "# Top 10 robotics stories of May 2026. May 2026 was a busy month full of robotics news, topped off by last week’s Robotics Summit & Expo in Boston. The event brought together thousands of robotics experts to discuss the latest technology and industry advances. Here are the 10 most popular articles on *The Robot Report* in the past month. Subscribe to *The Robot Report*Newsletter and listen to *The Robot Report* Podcast to stay up to date on the latest robotics developments. Humanoid partners with Bosch, Schaeffler to scale robot production in May 2026. London-based Humanoid said it is working with Bosch to scale production after the successful completion of a joint proof of concept in March. It serves as the primary hub for NEO, the company’s humanoid robot designed to operate quietly—at a decibel level lower than a modern refrigerator—while navigating domestic spaces. If you’ve built a robotics company in the past 10 years, chances are you’ve at least flirted with the idea of robotics as a service, or RaaS.",
+                "score": 0.9882222
+              },
+              {
+                "title": "ANSCER Robotics closes Series A round for industrial material handling - The Robot Report",
+                "url": "https://www.therobotreport.com/anscer-robotics-closes-series-a-round-industrial-material-handling/",
+                "source": "therobotreport.com",
+                "summary": "# ANSCER Robotics closes Series A round for industrial material handling. ANSCER Robotics provides autonomous mobile robots and software for industrial material handling. Aiming to capture a larger share of the American logistics market, deep-tech startup ANSCER Robotics has raised $5.4 million (₹45 crore) in Series A funding to scale its fleet of hybrid warehouse robots globally. The company said it is designing and building automation for the realities of modern manufacturing and logistics by helping enterprises improve productivity, safety, and operational efficiency at scale. According to ANSCER Robotics, this latest investment will accelerate its mission to build India’s AI-native industrial automation platform for factories and warehouses worldwide. “Naturally, we are expanding our markets and our product line, and the company will have a booth at Automate 2026,” Mark Messina, CEO of ANSCER Robotics Americas, told *The Robot Report*. “Our robots are designed and built for deployment in complex, rough environments — manufacturing floors and dock areas.”. Mike Oitzman is Senior Editor of WTWH's Robotics Group and founder of the Mobile Robot Guide.",
+                "score": 0.97737074
+              },
+              {
+                "title": "Why warehouse robotics succeeds or fails at scale: A Q&A with Christina Gomez-Terry of Plus One Robotics - Robotics & Automation News",
+                "url": "https://roboticsandautomationnews.com/2026/06/01/why-warehouse-robotics-succeeds-or-fails-at-scale-a-qa-with-christina-gomez-terry-of-plus-one-robotics/102105/",
+                "source": "roboticsandautomationnews.com",
+                "summary": "# Why warehouse robotics succeeds or fails at scale: A Q&A with Christina Gomez-Terry of Plus One Robotics. **Warehouse automation has entered a new phase. As logistics operators expand robotics systems across multiple facilities, they often discover that success depends less on peak performance and more on consistency, reliability, and operational resilience. In this Q&A, Christina Gomez-Terry, vice president of operations at Plus One Robotics, discusses the practical realities of scaling warehouse automation. She also discusses the long-term role of human-in-the-loop operations, the importance of customer support infrastructure, the influence of ROS and open-source robotics on commercial systems, and why integration may become the next major bottleneck facing warehouse automation. **Robotics & Automation News: You’ve said that a robotics company is only as strong as its “worst day.” What are the most common operational problems that emerge when warehouse robotics systems move from pilot projects to large-scale deployments?**.",
+                "score": 0.95791227
+              },
+              {
+                "title": "Silicon Valley's New Slogan: Let's Get Physical - Business Insider",
+                "url": "https://www.businessinsider.com/silicon-valleys-new-slogan-lets-get-physical-2026-6",
+                "source": "businessinsider.com",
+                "summary": "You're currently following this topic! The latest news and analysis on robotics, from humanoid AI to real-world automation. ### Figure AI had one of its robots race an intern to sort packages. This weekend offered a glimpse of how quickly the biggest AI players are moving in on humanoid robotics. Robotics has become tech's latest arms race, with Nvidia, OpenAI, Meta, Tesla, and a flock of startups racing to give AI a body. \"Physical AI\" is the buzzword of the moment in the Valley, a term popularized by Nvidia CEO Jensen Huang to describe AI systems that can act in the physical world. One of the buzziest Silicon Valley robotics upstarts, Figure AI, has been trying to prove its technology can move from demos to real work. The team is teaching a robotic arm how to perform household tasks as part of an effort to build a humanoid robot, Business Insider reported earlier this year.",
+                "score": 0.9507779
+              },
+              {
+                "title": "Reservoir’s Danny Bernstein says we’re ‘entering the golden age of robotics’ in agriculture - AgFunderNews",
+                "url": "https://agfundernews.com/reservoirs-danny-bernstein-says-were-entering-the-golden-age-of-robotics-in-agriculture",
+                "source": "agfundernews.com",
+                "summary": "# Reservoir’s Danny Bernstein says we’re ‘entering the golden age of robotics’ in agriculture. #### **Reservoir's Danny Bernstein with Western Growers CEO and president Dave Puglia. With the cracks in chemical-based crop protection widening, many are now contemplating the role of farm robotics in helping growers reduce reliance on these inputs. Danny Bernstein, CEO and managing partner of farm robotics incubator Reservoir, says this thinking is top of mind for many of the startups now operating out of the company’s campuses, which are employing everything from zapping weeds via electricity to controlling pests with UV light. California-based Reservoir itself has now expanded to two campuses—one in the Salinas Valley and one in Sonoma County—and plans to break ground on a third, in Central Valley, later this summer. (The deal with Western Growers is for the incubator side of the business.) We also have a management company that runs our fund, and that’s Reservoir VC.",
+                "score": 0.9092645
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "M03_correction_handle",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_correction",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: map tên thường, sửa Sam Altman→Andrej Karpathy, dùng handle karpathy và limit=3."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tweet mới nhất của Sam Altman"
+        },
+        {
+          "role": "user",
+          "content": "À nhầm, của Andrej Karpathy"
+        },
+        {
+          "role": "user",
+          "content": "Lấy 3 tweet mới nhất nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "Andrej Karpathy",
+              "limit": "3"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_arg_value",
+        "failures": [
+          "screenname: expected 'karpathy', got 'Andrej Karpathy'",
+          "limit: expected 3, got '3'"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "Andrej Karpathy",
+            "limit": "3"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M04_clarify_then_url",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_clarify_url",
+        "difficulty": "medium",
+        "what_it_tests": "3 turns: sau khi được cung cấp URL, latest turn xác nhận chỉ đọc link đó → read_url đúng url."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tóm tắt bài này hộ mình"
+        },
+        {
+          "role": "user",
+          "content": "https://anthropic.com/news/claude"
+        },
+        {
+          "role": "user",
+          "content": "Chỉ đọc đúng link đó thôi"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://anthropic.com/news/claude"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://anthropic.com/news/claude"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "fetch",
+          "args": {
+            "url": "https://anthropic.com/news/claude"
+          },
+          "result": {
+            "tool": "read_url",
+            "error": "RuntimeError",
+            "message": "Missing FIRECRAWL_API_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M05_correction_limit",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_arg_correction",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: map tên Elon Musk, carry handle elonmusk, sửa limit 10→3."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Lấy 10 tweet mới nhất của Elon Musk"
+        },
+        {
+          "role": "user",
+          "content": "Cho mình 3 thôi"
+        },
+        {
+          "role": "user",
+          "content": "Vẫn của Elon Musk nhé"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "Elon Musk",
+              "limit": "3"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_arg_value",
+        "failures": [
+          "screenname: expected 'elonmusk', got 'Elon Musk'",
+          "limit: expected 3, got '3'"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "Elon Musk",
+            "limit": "3"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "error": "RuntimeError",
+            "message": "Missing RAPIDAPI_KEY env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M06_switch_tool",
+      "phase": "B",
+      "suite": "base",
+      "case_suite": "base",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_switch_tool",
+        "difficulty": "hard",
+        "what_it_tests": "3 turns: explicitly bỏ Twitter, chuyển sang web_search news, giữ chủ đề OpenAI."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Mọi người nói gì về OpenAI trên Twitter?"
+        },
+        {
+          "role": "user",
+          "content": "Bỏ Twitter, chuyển sang tìm trên web tin tức đi"
+        },
+        {
+          "role": "user",
+          "content": "Giữ chủ đề OpenAI"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "OpenAI",
+              "topic": "news"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": true,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "OpenAI",
+              "topic": "general",
+              "timeframe": "week",
+              "max_results": "5"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "wrong_arg_value",
+        "failure_type": "wrong_tool",
+        "failures": [
+          "topic: expected 'news', got 'general'"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "OpenAI",
+            "topic": "general",
+            "timeframe": "week",
+            "max_results": "5"
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "OpenAI",
+            "topic": "general",
+            "timeframe": "week",
+            "items": [
+              {
+                "title": "Florida sues OpenAI and CEO Sam Altman, accusing them of putting profit over safety - NBC News",
+                "url": "https://www.nbcnews.com/tech/tech-news/florida-sues-openai-sam-altman-saying-put-profit-safety-rcna347602",
+                "source": "nbcnews.com",
+                "summary": "[Subscribe](https://www.nbcnews.com/subscribe?cid=wb_npd_nws_btn_12042025&tpcc=wb_npd_nws_btn_12042025&ref=https%3A%2F%2Fwww.nbcnews.com%2Ftech%2Ftech-news%2Fflorida-sues-openai-sam-altman-saying-put-profit-safety-rcna347602). *   [NBC OUT](https://www.nbcnews.com/nbc-out). *   [NBC News Now](https://www.nbcnews.com/watch). *   [Special Features](https://www.nbcnews.com/specials). *   [NBC News Site Map](https://www.nbcnews.com/archive). *   [](https://www.facebook.com/NBCNews). [Video 1](https://www.nbcnews.com/tech/tech-news/florida-sues-openai-sam-altman-saying-put-profit-safety-rcna347602). *   [](mailto:?subject=Florida%20sues%20OpenAI%20and%20Sam%20Altman,%20accusing%20the%20company%20of%20fueling%20violence&body=https://www.nbcnews.com/now/video/florida-sues-openai-and-sam-altman-accusing-the-company-of-fueling-violence-264293957915). [Florida sues OpenAI and Sam Altman, accusing the company of fueling violence](https://www.nbcnews.com/now/video/florida-sues-openai-and-sam-altman-accusing-the-company-of-fueling-violence-264293957915). [Get more news on](https://www.nbcnews.com/watch). The civil action, seeking penalties and a court order rather than criminal charges, said Uthmeier “seeks to hold Altman personally liable for the harm he has caused Floridians through his reckless and willful conduct as founder and CEO of OpenAI, including his utter disregard for the risk to human life caused by his firms’ conduct.” The action is separate from a [criminal investigation](https://www.nbcnews.com/tech/tech-news/florida-attorney-general-criminal-investigation-openai-fsu-chatgpt-rcna341205) into OpenAI that Uthmeier opened in late April, which remains ongoing. The complaint also points to the alleged use of ChatGPT in the planning of a [mass shooting at Florida State University](https://www.nbcnews.com/news/us-news/openai-sued-chatgpts-alleged-role-guiding-fsu-shooter-rcna344443) and the killing [of two graduate students at the University of South Florida](https://www.nbcnews.com/news/us-news/suspect-murder-florida-college-students-asked-chatgpt-putting-person-d-rcna342211). *   [About](https://www.nbcnews.com/information/nbc-news-info/about-nbc-news-digital-n1232178). *   [Contact](https://www.nbcnews.com/information/nbc-news-info/contact-us-n1232521). *   [Your Privacy Choices](https://www.nbcnews.com/tech/tech-news/florida-sues-openai-sam-altman-saying-put-profit-safety-rcna347602#). *   [NBC News Sitemap](https://www.nbcnews.com/archive). *   [Closed Captioning](https://www.nbcnews.com/information/nbc-news-info/closed-captioning-n1307063).",
+                "score": 0.5849357
+              },
+              {
+                "title": "Florida sues OpenAI and CEO Sam Altman, claiming company ...",
+                "url": "https://apnews.com/article/sam-altman-openai-lawsuit-florida-396d70c5a2d9bae7e95a8ee9adaef836",
+                "source": "apnews.com",
+                "summary": "Test Your News I.Q. 2026 Elections Election Results Election calendar White House Congress Supreme Court The latest AP-NORC polls Ground Game. Your home base for in-depth reporting from the world of sports. The future of a beloved dog statue on a New York warehouse is up in the air. Founded in 1846, AP today remains the most trusted source of fast, accurate, unbiased news in all formats and the essential provider of the technology and services vital to the news business. - AP’s Role in Elections. ap.org Careers Advertise with us AP News Values and Principles AP’s Role in Elections AP Leads AP Definitive Source Blog AP Images Spotlight Blog. MIAMI (AP) — The state of Florida filed a lawsuit against OpenAI and CEO Sam Altman on Monday, claiming the company knowingly released and aggressively marketed ChatGPT to the public while concealing serious risks. Pages from the Anthropic website and the company's logo are displayed on a computer screen in New York, Feb. 26, 2026.",
+                "score": 0.57437146
+              },
+              {
+                "title": "OpenAI's Frontier Governance Framework",
+                "url": "https://openai.com/index/openai-frontier-governance-framework",
+                "source": "openai.com",
+                "summary": "[Skip to main content](https://openai.com/index/openai-frontier-governance-framework#main). *   [Research](https://openai.com/research/index/). *   [Business](https://openai.com/business/). *   [Developers](https://openai.com/api/). *   [Company](https://openai.com/about/). [Safety](https://openai.com/news/safety-alignment/). [Read the Frontier Governance Framework(opens in a new window)](https://cdn.openai.com/pdf/e37d949b-8c9f-4d76-b99e-4272f4631a7e/openai-frontier-governance-framework.pdf). [Audio 1](https://openai.com/index/openai-frontier-governance-framework). The Frontier Governance Framework is available [here⁠(opens in a new window)](https://cdn.openai.com/pdf/e37d949b-8c9f-4d76-b99e-4272f4631a7e/openai-frontier-governance-framework.pdf). *   [Framework](https://openai.com/news/?tags=framework). *   [2026](https://openai.com/news/?tags=2026). [View all](https://openai.com/news/). [Helping ChatGPT better recognize context in sensitive conversations Safety May 14, 2026](https://openai.com/index/chatgpt-recognize-context-in-sensitive-conversations/). *   [Research Index](https://openai.com/research/index/). *   [Research Overview](https://openai.com/research/). *   [Research Residency](https://openai.com/residency/). *   [Economic Research](https://openai.com/signals/). *   [GPT-5.5](https://openai.com/index/introducing-gpt-5-5/). *   [GPT-5.4](https://openai.com/index/introducing-gpt-5-4/). *   [GPT-5.3 Instant](https://openai.com/index/gpt-5-3-instant/). *   [GPT-5.3-Codex](https://openai.com/index/introducing-gpt-5-3-codex/). *   [Safety Approach](https://openai.com/safety/). *   [Security & Privacy](https://openai.com/security-and-privacy/). *   [Trust & Transparency](https://openai.com/trust-and-transparency/). *   [Platform Overview](https://openai.com/api/). *   [Pricing](https://openai.com/api/pricing/). *   [API log in(opens in a new window)](https://platform.openai.com/login). *   [Documentation(opens in a new window)](https://developers.openai.com/api/docs). *   [Developer Forum(opens in a new window)](https://community.openai.com/). *   [Business Overview](https://openai.com/business/). *   [Solutions](https://openai.com/solutions/). *   [Contact Sales](https://openai.com/contact-sales/). *   [About Us](https://openai.com/about/). *   [Our Charter](https://openai.com/charter/). *   [Careers](https://openai.com/careers/). *   [Brand](https://openai.com/brand/). *   [Help Center(opens in a new window)](https://help.openai.com/). *   [News](https://openai.com/news/). *   [Stories](https://openai.com/stories/). *   [Academy](https://openai.com/academy/). *   [Livestreams](https://openai.com/live/). *   [Podcast](https://openai.com/podcast/). *   [RSS](https://openai.com/news/rss.xml). *   [Terms of Use](https://openai.com/policies/terms-of-use/). *   [Privacy Policy](https://openai.com/policies/privacy-policy/). *   [Other Policies](https://openai.com/policies/).",
+                "score": 0.5393963
+              },
+              {
+                "title": "Warp’s big bet on building open source with GPT-5.5",
+                "url": "https://openai.com/index/warp",
+                "source": "openai.com",
+                "summary": "[Skip to main content](https://openai.com/index/warp#main). *   [Research](https://openai.com/research/index/). *   [Business](https://openai.com/business/). *   [Developers](https://openai.com/api/). *   [Company](https://openai.com/about/). *   [The next generation of collaborative software development](https://openai.com/index/warp#the-next-generation-of-collaborative-software-development). *   [Agentic orchestration with Oz](https://openai.com/index/warp#agentic-orchestration-with-oz). *   [Building the infrastructure for agentic development](https://openai.com/index/warp#building-the-infrastructure-for-agentic-development). [Start building with OpenAI(opens in a new window)](https://openai.com/startups). [Audio 1](https://openai.com/index/warp). When Warp [open-sourced⁠(opens in a new window)](https://www.warp.dev/blog/warp-is-now-open-source) its terminal client this year, with OpenAI as the founding sponsor of the repo, the company also introduced Open Agentic Development: a model for building software in the open. ![Image 2: Diagram showing Warp's Open Agentic Development workflow.](https://images.ctfassets.net/kftzwdyauwt9/LIctfUsXv5q5lTqMM85fe/2d781c7e5f82dd5d140635f7e2783bd0/WarpWorkflow_Light.jpg?w=3840&q=90&fm=webp). [Join the community](https://openai.com/leads/startup/)[Start building(opens in a new window)](https://openai.com/startups). [View all](https://openai.com/news/). [Parloa builds service agents customers want to talk to Startup May 7, 2026](https://openai.com/index/parloa/). *   [GPT-5.5](https://openai.com/index/introducing-gpt-5-5/). *   [GPT-5.4](https://openai.com/index/introducing-gpt-5-4/). *   [Platform Overview](https://openai.com/api/). *   [API log in(opens in a new window)](https://platform.openai.com/login). *   [Documentation(opens in a new window)](https://developers.openai.com/api/docs). *   [Developer Forum(opens in a new window)](https://community.openai.com/). *   [Solutions](https://openai.com/solutions/). *   [About Us](https://openai.com/about/). *   [Brand](https://openai.com/brand/). *   [Help Center(opens in a new window)](https://help.openai.com/). *   [News](https://openai.com/news/). *   [Stories](https://openai.com/stories/). *   [Livestreams](https://openai.com/live/). *   [Other Policies](https://openai.com/policies/).",
+                "score": 0.44189036
+              },
+              {
+                "title": "OpenAI frontier models and Codex are now available on AWS",
+                "url": "https://openai.com/index/openai-frontier-models-and-codex-are-now-available-on-aws",
+                "source": "openai.com",
+                "summary": "[Skip to main content](https://openai.com/index/openai-frontier-models-and-codex-are-now-available-on-aws#main). *   [Research](https://openai.com/research/index/). *   [Business](https://openai.com/business/). *   [Developers](https://openai.com/api/). *   [Company](https://openai.com/about/). *   [Bringing OpenAI capabilities into AWS environments](https://openai.com/index/openai-frontier-models-and-codex-are-now-available-on-aws#bringing-openai-capabilities-into-aws-environments). *   [Helping customers move from interest to implementation](https://openai.com/index/openai-frontier-models-and-codex-are-now-available-on-aws#helping-customers-move-from-interest-to-implementation). *   [What’s next, including cyber availability](https://openai.com/index/openai-frontier-models-and-codex-are-now-available-on-aws#whats-next-including-cyber-availability). [Get started with OpenAI on AWS(opens in a new window)](https://aws.amazon.com/bedrock/openai/). [**OpenAI models on Amazon Bedrock**⁠(opens in a new window)](https://aws.amazon.com/bedrock/openai/) allows teams to build AI applications using AWS-native security and governance controls. [**Codex on Amazon Bedrock**⁠(opens in a new window)](https://developers.openai.com/codex/amazon-bedrock) brings OpenAI’s leading software engineering agent - used by more than 5 million people every week - into AWS, helping teams write, review, debug, and modernize code in the environments where they already build and ship. *   [2026](https://openai.com/news/?tags=2026). *   [Codex](https://openai.com/news/?tags=codex). [View all](https://openai.com/news/). [Work with Codex from anywhere Product May 14, 2026](https://openai.com/index/work-with-codex-from-anywhere/). *   [Platform Overview](https://openai.com/api/). *   [API log in(opens in a new window)](https://platform.openai.com/login). *   [Documentation(opens in a new window)](https://developers.openai.com/api/docs). *   [Developer Forum(opens in a new window)](https://community.openai.com/). *   [About Us](https://openai.com/about/). *   [Help Center(opens in a new window)](https://help.openai.com/). *   [News](https://openai.com/news/).",
+                "score": 0.38894346
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
