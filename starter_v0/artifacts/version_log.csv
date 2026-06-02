@@ -1,3 +1,5 @@
 version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_before,metric_after,run_file
 v0,le-duy-hung,baseline,v0+pf0c107a9d7a1+t011c271ef0bb,f0c107a9d7a1,011c271ef0bb,baseline,Đo hành vi repo mẫu trước khi sửa,,0.5625,runs/v0_B_base_gemini_20260602T123816407145.json
 v1,le-duy-hung,system_prompt.md,v1+pd745c44513e8+t011c271ef0bb,d745c44513e8,011c271ef0bb,Sửa prompt routing và safety boundaries,Prompt rõ hơn về clarify confirmation scope parallel và arg conventions sẽ giảm đoán bừa,0.5625,0.8333,runs/v1_B_base_gemini_20260602T134746673233.json
+v2,le-duy-hung,tools.yaml,v2+pd745c44513e8+t390f5d5c4a81,d745c44513e8,390f5d5c4a81,Làm rõ core tool declarations đặc biệt clarify response_type,Tool descriptions rõ hơn sẽ giúp model truyền response_type và args đúng hơn,0.8333,0.9444,runs/v2_B_base_gemini_20260602T142602864518.json
+v3,le-duy-hung,system_prompt.md,v3+p4f7db33f5460+t390f5d5c4a81,4f7db33f5460,390f5d5c4a81,Làm mạnh boundary xác nhận send post publish trong prompt,Prompt bắt buộc clarify yes_no trước khi gửi đăng publish sẽ fix R12 wrong_boundary,0.9444,1.0,runs/v3_B_base_gemini_20260602T143100429911.json
