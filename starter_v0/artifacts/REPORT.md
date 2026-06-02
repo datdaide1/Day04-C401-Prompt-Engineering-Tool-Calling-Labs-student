@@ -6,8 +6,8 @@
 
 ## Team
 
-- Team: 
-- Members: 
+- Team: Zone4 - Group3
+- Members: Trần Hoàng Đạt - 2A202600807, Lê Duy Hùng - 2A202600718
 - Provider/model: gemini / `gemini-3.1-flash-lite`; openrouter / `meta/llama-3.3-70b-instruct`
 
 ---
