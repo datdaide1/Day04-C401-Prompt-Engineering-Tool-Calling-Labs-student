@@ -140,7 +140,7 @@ with st.sidebar:
     provider_default_models = {
         "openrouter": "meta/llama-3.3-70b-instruct",
         "openai": "gpt-4o-mini",
-        "gemini": "gemini-1.5-flash",
+        "gemini": "gemini-3.1-flash-lite",
         "anthropic": "claude-3-5-sonnet-latest"
     }
     model_name = st.text_input("Model ID", value=provider_default_models.get(provider_name, ""))
