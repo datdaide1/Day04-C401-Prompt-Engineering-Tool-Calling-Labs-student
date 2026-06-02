@@ -1,7 +1,279 @@
 {
   "dataset_id": "day04_v2_research_group",
   "dataset_role": "group",
-  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
+  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp cho các core tool, bonus tool và github tool.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_github_search",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm kiếm các repository hàng đầu về Llama 3 trên GitHub",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "github",
+            "args": {
+              "query": "Llama 3",
+              "sort": "stars"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "github_search",
+        "difficulty": "easy",
+        "what_it_tests": "Tìm kiếm repo GitHub theo query với mặc định sort là stars"
+      }
+    },
+    {
+      "id": "G02_github_details",
+      "phase": "B",
+      "suite": "group",
+      "query": "Xem thông tin chi tiết của repository facebookresearch/llama trên GitHub",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "github",
+            "args": {
+              "repository": "facebookresearch/llama"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "github_details",
+        "difficulty": "easy",
+        "what_it_tests": "Lấy chi tiết repo GitHub từ tên đầy đủ dạng owner/repo"
+      }
+    },
+    {
+      "id": "G03_policy_source_citation",
+      "phase": "B",
+      "suite": "group",
+      "query": "Theo tài liệu hướng dẫn nội bộ, khi trích dẫn arXiv chúng ta cần cung cấp những thông tin gì?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "query": "trích dẫn arXiv",
+              "policy_area": "source_citation"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "policy_search",
+        "difficulty": "medium",
+        "what_it_tests": "Tìm kiếm chính sách công ty về source_citation"
+      }
+    },
+    {
+      "id": "G04_papers_search",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm các bài báo mới nhất về Retrieval-Augmented Generation trên arXiv",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "query": "Retrieval-Augmented Generation",
+              "sort_by": "submittedDate"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "arxiv_search",
+        "difficulty": "medium",
+        "what_it_tests": "Tìm bài báo arXiv mới nhất và truyền tham số sort_by chính xác"
+      }
+    },
+    {
+      "id": "G05_paper_text_pages",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tải và trích xuất text 3 trang đầu tiên của bài báo arXiv 1706.03762",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "paper_text",
+            "args": {
+              "arxiv_url": "1706.03762",
+              "max_pages": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "arxiv_extract_text",
+        "difficulty": "easy",
+        "what_it_tests": "Trích xuất text bài báo arXiv với max_pages cụ thể"
+      }
+    },
+    {
+      "id": "G06_github_missing_query",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm repo trên GitHub hộ mình"
+        },
+        {
+          "role": "user",
+          "content": "stable diffusion"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "github",
+            "args": {
+              "query": "stable diffusion"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_github_missing_info",
+        "difficulty": "medium",
+        "what_it_tests": "2 turns: thiếu query ở lượt 1, bổ sung ở lượt 2 và gọi github tool"
+      }
+    },
+    {
+      "id": "G07_send_telegram_confirm",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Gửi bài tóm tắt này lên Telegram: Mô hình Llama 3.3 vừa ra mắt rất ấn tượng."
+        },
+        {
+          "role": "user",
+          "content": "Có, gửi đi"
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "Mô hình Llama 3.3 vừa ra mắt rất ấn tượng.",
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_send_confirm",
+        "difficulty": "medium",
+        "what_it_tests": "2 turns: yêu cầu send ở lượt 1 -> cần clarify, lượt 2 xác nhận -> gọi send với confirmed=true"
+      }
+    },
+    {
+      "id": "G08_policy_missing_area",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Xem tài liệu nội bộ về chính sách công ty"
+        },
+        {
+          "role": "user",
+          "content": "về bảo mật dữ liệu"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "query": "bảo mật dữ liệu",
+              "policy_area": "data_privacy"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_policy_clarify",
+        "difficulty": "hard",
+        "what_it_tests": "2 turns: hỏi chung chung về chính sách công ty -> hỏi lại, lượt 2 nói rõ bảo mật dữ liệu -> policy data_privacy"
+      }
+    },
+    {
+      "id": "G09_github_detail_clarify",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Xem thông tin chi tiết repository trên GitHub"
+        },
+        {
+          "role": "user",
+          "content": "facebookresearch/llama"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "github",
+            "args": {
+              "repository": "facebookresearch/llama"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_github_details_clarify",
+        "difficulty": "medium",
+        "what_it_tests": "2 turns: muốn xem chi tiết repo nhưng thiếu tên -> hỏi lại, lượt 2 cung cấp repo -> gọi github details"
+      }
+    },
+    {
+      "id": "G10_out_of_scope_math",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tính đạo hàm của hàm số y = x^3 - 3x"
+        },
+        {
+          "role": "user",
+          "content": "Thế tìm paper về đạo hàm trên arXiv"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "papers",
+            "args": {
+              "query": "đạo hàm"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_out_of_scope_switch",
+        "difficulty": "hard",
+        "what_it_tests": "2 turns: lượt 1 toán học ngoài phạm vi -> từ chối, lượt 2 chuyển sang tìm paper arXiv -> gọi papers"
+      }
+    }
+  ]
 }

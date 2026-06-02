@@ -17,6 +17,7 @@ from .policy.tool import search_company_policy
 from .social_search.tool import search_tweets
 from .send.tool import send_telegram
 from .lookup.tool import web_search
+from .github.tool import search_github
 
 
 # NOTE (starter_v0): tool names here are intentionally vague. These keys are the
@@ -35,7 +36,9 @@ TOOL_FUNCTIONS = {
     "policy": search_company_policy,
     "papers": arxiv_search,
     "paper_text": get_arxiv_paper_text,
+    "github": search_github,
 }
+
 
 
 def load_tool_declarations(path: Path) -> list[dict[str, Any]]:

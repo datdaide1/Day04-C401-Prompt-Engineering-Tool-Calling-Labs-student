@@ -1,0 +1,28 @@
+{
+  "transcript_id": "v2_openrouter_20260602T145410837522",
+  "version": "v2",
+  "artifact_version": "v2+pec91d053d30f+t6e21845ea3a5",
+  "prompt_hash": "ec91d053d30f129fa3921e6ea26e0f390f16b7fb3c7670b0622c675d2b93a299",
+  "tools_hash": "6e21845ea3a5fe08494855ee70933043d3e095928512906f497c9ca6c451a728",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "E:\\VINUNI\\Day04-C401-Prompt-Engineering-Tool-Calling-Labs-student\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "E:\\VINUNI\\Day04-C401-Prompt-Engineering-Tool-Calling-Labs-student\\starter_v0\\artifacts\\tools.yaml",
+  "history_window": 5,
+  "max_tool_rounds": 4,
+  "created_at": "2026-06-02T14:54:10",
+  "updated_at": "2026-06-02T14:55:02",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-06-02T14:54:59",
+      "user": "TĂ¬m kiáº¿m cĂ¡c bĂ i viáº¿t cá»§a Sam Altman trĂªn Twitter",
+      "status": "provider_error",
+      "assistant_text": null,
+      "rounds": [],
+      "tool_events": [],
+      "error": "NotFoundError: 404 page not found",
+      "ended_at": "2026-06-02T14:55:02"
+    }
+  ]
+}
